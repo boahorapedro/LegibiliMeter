@@ -107,7 +107,6 @@ public class CognitiveComplexityFeature implements Feature {
         ifStmt.getElseStmt().ifPresent(elseStmt -> scoreElse(elseStmt, nesting, acc));
     }
 
-    /** {@code else} e {@code else if} somam +1 estrutural, sem penalidade de aninhamento. */
     private void scoreElse(Statement elseStmt, int nesting, int[] acc) {
         if (elseStmt instanceof IfStmt elseIf) {
             acc[0] += 1;
@@ -126,7 +125,6 @@ public class CognitiveComplexityFeature implements Feature {
         }
     }
 
-    /** Conta sequências de operadores lógicos de mesmo tipo; alternar &amp;&amp;/|| soma +1. */
     private int logicalSequences(Expression expr, BinaryExpr.Operator parentOp) {
         if (expr instanceof BinaryExpr bin && isLogical(bin)) {
             int count = bin.getOperator() != parentOp ? 1 : 0;
@@ -137,7 +135,6 @@ public class CognitiveComplexityFeature implements Feature {
         return 0;
     }
 
-    /** Desce nos operandos não-lógicos para pontuar estruturas aninhadas (ternários, lambdas). */
     private void scoreLogicalOperands(Expression expr, int nesting, int[] acc) {
         if (expr instanceof BinaryExpr bin && isLogical(bin)) {
             scoreLogicalOperands(bin.getLeft(), nesting, acc);

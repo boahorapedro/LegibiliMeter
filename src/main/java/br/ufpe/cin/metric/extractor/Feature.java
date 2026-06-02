@@ -13,9 +13,7 @@ package br.ufpe.cin.metric.extractor;
  */
 public interface Feature {
 
-    /** Identificador estável da feature (usado pelo Scorer e pelo Reporter). */
     String name();
 
-    /** Extrai o valor bruto da feature a partir do arquivo. */
     FeatureResult extract(SourceFile file);
 }
