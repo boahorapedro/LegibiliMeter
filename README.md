@@ -4,8 +4,6 @@ Ferramenta de linha de comando que atribui uma **nota de legibilidade [0–10]**
 Java. Em vez de calcular métricas isoladas (como PMD ou SonarQube), o LegibiliMeter combina
 cinco características estruturais em um **score unificado e interpretável**.
 
-> Projeto da disciplina — Fase 1 (Proposta). O planejamento completo está em
-> [`roteiro_metrica_legibilidade.md`](roteiro_metrica_legibilidade.md).
 
 ## O que a métrica mede
 
