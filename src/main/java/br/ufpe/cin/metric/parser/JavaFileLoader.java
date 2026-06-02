@@ -1,4 +1,4 @@
-package br.ufpe.cin.parser;
+package br.ufpe.cin.metric.parser;
 
 import com.github.javaparser.StaticJavaParser;
 import com.github.javaparser.ast.CompilationUnit;

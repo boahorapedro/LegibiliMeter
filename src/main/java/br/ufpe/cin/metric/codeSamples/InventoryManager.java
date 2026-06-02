@@ -1,10 +1,9 @@
-package br.ufpe.cin;
+package br.ufpe.cin.metric.codeSamples;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.time.LocalDate;
 
 public class InventoryManager {
 

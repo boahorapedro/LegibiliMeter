@@ -1,6 +1,6 @@
-package br.ufpe.cin;
+package br.ufpe.cin.metric;
 
-import br.ufpe.cin.parser.JavaFileLoader;
+import br.ufpe.cin.metric.parser.JavaFileLoader;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.body.MethodDeclaration;
 
