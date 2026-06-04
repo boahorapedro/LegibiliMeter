@@ -1,4 +1,6 @@
-package br.ufpe.cin.metric.extractor;
+package br.ufpe.cin.metric.extractor.features;
+
+import br.ufpe.cin.metric.extractor.MethodLevelFeature;
 
 import com.github.javaparser.ast.Node;
 import com.github.javaparser.ast.body.MethodDeclaration;
@@ -10,17 +12,7 @@ import com.github.javaparser.ast.stmt.SwitchStmt;
 import com.github.javaparser.ast.stmt.TryStmt;
 import com.github.javaparser.ast.stmt.WhileStmt;
 
-import java.util.List;
-
-/**
- * Feature 1: Profundidade de Aninhamento.
- *
- * <p>Para cada método, mede o nível máximo de blocos de controle encadeados
- * ({@code if}, {@code for}, {@code while}, {@code do}, {@code try}, {@code switch}).
- * Agrega o arquivo pelo pior método ({@code max}) e pela média entre métodos ({@code mean}).
- * Limiares (ver roteiro): ≤ 2 excelente | 3 aceitável | 4 problemático | ≥ 5 crítico.
- */
-public class NestingDepthFeature implements Feature {
+public class NestingDepthFeature extends MethodLevelFeature {
 
     public static final String NAME = "nestingDepth";
 
@@ -30,22 +22,8 @@ public class NestingDepthFeature implements Feature {
     }
 
     @Override
-    public FeatureResult extract(SourceFile file) {
-        List<MethodDeclaration> methods = file.ast().findAll(MethodDeclaration.class);
-        if (methods.isEmpty()) {
-            return new FeatureResult(NAME, 0, 0);
-        }
-
-        int max = 0;
-        long sum = 0;
-        for (MethodDeclaration method : methods) {
-            int depth = maxControlNesting(method);
-            max = Math.max(max, depth);
-            sum += depth;
-        }
-
-        double mean = (double) sum / methods.size();
-        return new FeatureResult(NAME, max, mean);
+    protected int measure(MethodDeclaration method) {
+        return maxControlNesting(method);
     }
 
     private int maxControlNesting(Node node) {

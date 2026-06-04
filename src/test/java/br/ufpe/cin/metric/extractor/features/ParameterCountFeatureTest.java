@@ -1,4 +1,7 @@
-package br.ufpe.cin.metric.extractor;
+package br.ufpe.cin.metric.extractor.features;
+
+import br.ufpe.cin.metric.model.FeatureResult;
+import br.ufpe.cin.metric.model.SourceFile;
 
 import br.ufpe.cin.metric.parser.JavaFileLoader;
 import org.junit.jupiter.api.Test;
@@ -9,23 +12,18 @@ import java.net.URL;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-class NestingDepthFeatureTest {
+class ParameterCountFeatureTest {
 
-    private final NestingDepthFeature feature = new NestingDepthFeature();
+    private final ParameterCountFeature feature = new ParameterCountFeature();
 
     @Test
-    void medeAninhamentoPorMetodo() {
-        // profundidades: 0, 1, 3 (for→while→if)
+    void contaMaxEMediaComFonteControlada() {
         SourceFile file = SourceFile.of("T.java",
-                "class T {"
-                        + " void flat() { int x = 1; }"
-                        + " void one() { if (x) {} }"
-                        + " void three() { for (;;) { while (b) { if (c) {} } } }"
-                        + "}");
+                "class T { void a() {} void b(int x) {} void c(int x, int y, int z) {} }");
 
         FeatureResult result = feature.extract(file);
 
-        assertEquals(NestingDepthFeature.NAME, result.feature());
+        assertEquals(ParameterCountFeature.NAME, result.feature());
         assertEquals(3, result.max());
         assertEquals(4.0 / 3.0, result.mean(), 1e-9);
     }
@@ -40,14 +38,13 @@ class NestingDepthFeatureTest {
 
     @Test
     void avaliaAmostraReal() throws Exception {
-        // pior método (checkLowStock / listProducts) aninha for→if = 2; soma=9 em 10 métodos
         URL sample = getClass().getResource("/samples/InventoryManager.java");
         assertNotNull(sample, "amostra InventoryManager.java não encontrada no classpath");
         SourceFile file = JavaFileLoader.loadSource(new File(sample.toURI()).getPath());
 
         FeatureResult result = feature.extract(file);
 
-        assertEquals(2, result.max());
-        assertEquals(0.9, result.mean(), 1e-9);
+        assertEquals(4, result.max());
+        assertEquals(1.0, result.mean(), 1e-9);
     }
 }
