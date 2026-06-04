@@ -11,6 +11,15 @@ import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+/**
+ * Testes unitários do Scorer.
+ *
+ * Os valores esperados são calculados diretamente pela fórmula do grupo:
+ *   score = max(0, 1 - valor / limiar)
+ *
+ * A nota final é:
+ *   (soma ponderada dos scores [0-1]) * 10
+ */
 class ScorerTest {
 
     private Scorer scorer;
@@ -21,382 +30,335 @@ class ScorerTest {
     }
 
     // =========================================================================
-    // Complexidade Cognitiva
+    // Helper: fórmula de referência para calcular valores esperados nos testes
+    // =========================================================================
+    private static double esperado(double valor, double limiar) {
+        return Math.max(0.0, 1.0 - valor / limiar);
+    }
+
+    private static FeatureResult result(String name, double value) {
+        return FeatureResult.single(name, value);
+    }
+
+    // =========================================================================
+    // Complexidade Cognitiva  (limiar = 15)
     // =========================================================================
     @Nested
-    @DisplayName("CognitiveComplexity — normalização")
+    @DisplayName("CognitiveComplexity — score = max(0, 1 - CogC / 15)")
     class CognitiveComplexityTests {
 
-        @Test
-        @DisplayName("CogC = 0 → score 10 (código trivial)")
-        void zeroComplexity() {
-            FeatureScore fs = scorer.scoreCognitive(result(CognitiveComplexityFeature.NAME, 0));
-            assertEquals(10.0, fs.score());
+        @Test @DisplayName("CogC = 0  → score 1.00")
+        void cogc_0() {
+            var fs = scorer.scoreCognitive(result(CognitiveComplexityFeature.NAME, 0));
+            assertEquals(1.0, fs.score(), 0.001);
         }
 
-        @Test
-        @DisplayName("CogC = 5 → score 10 (limite superior do excelente)")
-        void atIdealLimit() {
-            FeatureScore fs = scorer.scoreCognitive(result(CognitiveComplexityFeature.NAME, 5));
-            assertEquals(10.0, fs.score());
+        @Test @DisplayName("CogC = 3  → score 0.80")
+        void cogc_3() {
+            var fs = scorer.scoreCognitive(result(CognitiveComplexityFeature.NAME, 3));
+            assertEquals(esperado(3, 15), fs.score(), 0.01);
         }
 
-        @Test
-        @DisplayName("CogC = 10 → score 8 (limite da faixa boa)")
-        void atGoodLimit() {
-            FeatureScore fs = scorer.scoreCognitive(result(CognitiveComplexityFeature.NAME, 10));
-            assertEquals(8.0, fs.score());
+        @Test @DisplayName("CogC = 5  → score 0.67")
+        void cogc_5() {
+            var fs = scorer.scoreCognitive(result(CognitiveComplexityFeature.NAME, 5));
+            assertEquals(esperado(5, 15), fs.score(), 0.01);
         }
 
-        @Test
-        @DisplayName("CogC = 15 → score 5 (limite aceitável)")
-        void atAcceptableLimit() {
-            FeatureScore fs = scorer.scoreCognitive(result(CognitiveComplexityFeature.NAME, 15));
-            assertEquals(5.0, fs.score());
+        @Test @DisplayName("CogC = 10 → score 0.33")
+        void cogc_10() {
+            var fs = scorer.scoreCognitive(result(CognitiveComplexityFeature.NAME, 10));
+            assertEquals(esperado(10, 15), fs.score(), 0.01);
         }
 
-        @Test
-        @DisplayName("CogC = 16 → score < 5 (acima do limite crítico)")
-        void aboveCritical() {
-            FeatureScore fs = scorer.scoreCognitive(result(CognitiveComplexityFeature.NAME, 16));
-            assertTrue(fs.score() < 5.0);
-        }
-
-        @Test
-        @DisplayName("CogC = 30 → score 0 (muito acima do crítico)")
-        void farAboveCritical() {
-            FeatureScore fs = scorer.scoreCognitive(result(CognitiveComplexityFeature.NAME, 30));
+        @Test @DisplayName("CogC = 15 → score 0.00")
+        void cogc_15() {
+            var fs = scorer.scoreCognitive(result(CognitiveComplexityFeature.NAME, 15));
             assertEquals(0.0, fs.score());
         }
 
-        @Test
-        @DisplayName("null → score 10 (arquivo sem métodos não penaliza)")
-        void nullResult() {
-            FeatureScore fs = scorer.scoreCognitive(null);
-            assertEquals(10.0, fs.score());
+        @Test @DisplayName("CogC = 20 → score 0.00 (max trava em 0)")
+        void cogc_20() {
+            var fs = scorer.scoreCognitive(result(CognitiveComplexityFeature.NAME, 20));
+            assertEquals(0.0, fs.score());
+        }
+
+        @Test @DisplayName("null → score 1.0 (sem métodos não penaliza)")
+        void cogc_null() {
+            assertEquals(1.0, scorer.scoreCognitive(null).score());
         }
     }
 
     // =========================================================================
-    // Profundidade de Aninhamento
+    // Profundidade de Aninhamento  (limiar = 5)
     // =========================================================================
     @Nested
-    @DisplayName("NestingDepth — normalização")
+    @DisplayName("NestingDepth — score = max(0, 1 - depth / 5)")
     class NestingDepthTests {
 
-        @Test
-        @DisplayName("depth = 1 → score 10 (excelente)")
-        void shallowNesting() {
-            FeatureScore fs = scorer.scoreNesting(result(NestingDepthFeature.NAME, 1));
-            assertEquals(10.0, fs.score());
+        @Test @DisplayName("depth = 0 → score 1.00")
+        void depth_0() {
+            assertEquals(1.0, scorer.scoreNesting(result(NestingDepthFeature.NAME, 0)).score());
         }
 
-        @Test
-        @DisplayName("depth = 2 → score 10 (limite excelente)")
-        void atExcellentLimit() {
-            FeatureScore fs = scorer.scoreNesting(result(NestingDepthFeature.NAME, 2));
-            assertEquals(10.0, fs.score());
+        @Test @DisplayName("depth = 1 → score 0.80")
+        void depth_1() {
+            assertEquals(esperado(1, 5), scorer.scoreNesting(result(NestingDepthFeature.NAME, 1)).score(), 0.001);
         }
 
-        @Test
-        @DisplayName("depth = 3 → score 7 (aceitável, limite Linus Torvalds)")
-        void atAcceptableLimit() {
-            FeatureScore fs = scorer.scoreNesting(result(NestingDepthFeature.NAME, 3));
-            assertEquals(7.0, fs.score());
+        @Test @DisplayName("depth = 3 → score 0.40")
+        void depth_3() {
+            assertEquals(esperado(3, 5), scorer.scoreNesting(result(NestingDepthFeature.NAME, 3)).score(), 0.001);
         }
 
-        @Test
-        @DisplayName("depth = 4 → score 4 (problemático)")
-        void atProblematicLimit() {
-            FeatureScore fs = scorer.scoreNesting(result(NestingDepthFeature.NAME, 4));
-            assertEquals(4.0, fs.score());
+        @Test @DisplayName("depth = 5 → score 0.00")
+        void depth_5() {
+            assertEquals(0.0, scorer.scoreNesting(result(NestingDepthFeature.NAME, 5)).score());
         }
 
-        @Test
-        @DisplayName("depth = 5 → score ≤ 2 (crítico)")
-        void atCriticalLimit() {
-            FeatureScore fs = scorer.scoreNesting(result(NestingDepthFeature.NAME, 5));
-            assertTrue(fs.score() <= 2.0);
-        }
-
-        @Test
-        @DisplayName("depth ≥ 6 → score 0")
-        void beyondCritical() {
-            FeatureScore fs = scorer.scoreNesting(result(NestingDepthFeature.NAME, 6));
-            assertEquals(0.0, fs.score());
+        @Test @DisplayName("depth = 8 → score 0.00 (max trava em 0)")
+        void depth_8() {
+            assertEquals(0.0, scorer.scoreNesting(result(NestingDepthFeature.NAME, 8)).score());
         }
     }
 
     // =========================================================================
-    // Comprimento de Identificadores
+    // Comprimento de Identificadores  (zona ideal [8, 15])
     // =========================================================================
     @Nested
-    @DisplayName("IdentifierLength — normalização")
+    @DisplayName("IdentifierLength — zona ideal [8, 15], zeros em 4 e 25")
     class IdentifierLengthTests {
 
-        @Test
-        @DisplayName("mean = 10 → score 10 (zona ideal 8–15)")
-        void inIdealRange() {
-            FeatureScore fs = scorer.scoreIdentifier(result(IdentifierLengthFeature.NAME, 10));
-            assertEquals(10.0, fs.score());
+        @Test @DisplayName("mean = 10 → score 1.0 (dentro do ideal)")
+        void id_ideal() {
+            assertEquals(1.0, scorer.scoreIdentifier(result(IdentifierLengthFeature.NAME, 10)).score());
         }
 
-        @Test
-        @DisplayName("mean = 8 → score 10 (limite inferior do ideal)")
-        void atLowerIdealBound() {
-            FeatureScore fs = scorer.scoreIdentifier(result(IdentifierLengthFeature.NAME, 8));
-            assertEquals(10.0, fs.score());
+        @Test @DisplayName("mean = 8  → score 1.0 (limite inferior do ideal)")
+        void id_lowerBound() {
+            assertEquals(1.0, scorer.scoreIdentifier(result(IdentifierLengthFeature.NAME, 8)).score());
         }
 
-        @Test
-        @DisplayName("mean = 15 → score 10 (limite superior do ideal)")
-        void atUpperIdealBound() {
-            FeatureScore fs = scorer.scoreIdentifier(result(IdentifierLengthFeature.NAME, 15));
-            assertEquals(10.0, fs.score());
+        @Test @DisplayName("mean = 15 → score 1.0 (limite superior do ideal)")
+        void id_upperBound() {
+            assertEquals(1.0, scorer.scoreIdentifier(result(IdentifierLengthFeature.NAME, 15)).score());
         }
 
-        @Test
-        @DisplayName("mean = 3 → score 0 (muito curto → críptico)")
-        void tooShort() {
-            FeatureScore fs = scorer.scoreIdentifier(result(IdentifierLengthFeature.NAME, 3));
-            assertEquals(0.0, fs.score());
+        @Test @DisplayName("mean = 4  → score 0.0 (no limite inferior externo)")
+        void id_zeroBelow() {
+            assertEquals(0.0, scorer.scoreIdentifier(result(IdentifierLengthFeature.NAME, 4)).score());
         }
 
-        @Test
-        @DisplayName("mean = 25 → score 0 (muito longo → prejudica escaneabilidade)")
-        void tooLong() {
-            FeatureScore fs = scorer.scoreIdentifier(result(IdentifierLengthFeature.NAME, 25));
-            assertEquals(0.0, fs.score());
+        @Test @DisplayName("mean = 1  → score 0.0 (muito curto)")
+        void id_tooShort() {
+            assertEquals(0.0, scorer.scoreIdentifier(result(IdentifierLengthFeature.NAME, 1)).score());
         }
 
-        @Test
-        @DisplayName("mean = 7 → score entre 0 e 10 (zona de penalização leve)")
-        void slightlyShort() {
-            FeatureScore fs = scorer.scoreIdentifier(result(IdentifierLengthFeature.NAME, 7));
-            assertTrue(fs.score() > 0.0 && fs.score() < 10.0);
+        @Test @DisplayName("mean = 25 → score 0.0 (no limite superior externo)")
+        void id_zeroAbove() {
+            assertEquals(0.0, scorer.scoreIdentifier(result(IdentifierLengthFeature.NAME, 25)).score());
+        }
+
+        @Test @DisplayName("mean = 6  → score entre 0 e 1 (rampa de subida)")
+        void id_rampUp() {
+            double s = scorer.scoreIdentifier(result(IdentifierLengthFeature.NAME, 6)).score();
+            assertTrue(s > 0.0 && s < 1.0, "score esperado entre 0 e 1, mas foi: " + s);
+        }
+
+        @Test @DisplayName("mean = 20 → score entre 0 e 1 (rampa de descida)")
+        void id_rampDown() {
+            double s = scorer.scoreIdentifier(result(IdentifierLengthFeature.NAME, 20)).score();
+            assertTrue(s > 0.0 && s < 1.0, "score esperado entre 0 e 1, mas foi: " + s);
         }
     }
 
     // =========================================================================
-    // Número de Parâmetros
+    // Número de Parâmetros  (limiar = 5)
     // =========================================================================
     @Nested
-    @DisplayName("ParameterCount — normalização")
+    @DisplayName("ParameterCount — score = max(0, 1 - params / 5)")
     class ParameterCountTests {
 
-        @Test
-        @DisplayName("max = 0 → score 10 (niládico — ideal máximo)")
-        void noParams() {
-            FeatureScore fs = scorer.scoreParameter(result(ParameterCountFeature.NAME, 0));
-            assertEquals(10.0, fs.score());
+        @Test @DisplayName("params = 0 → score 1.00")
+        void params_0() {
+            assertEquals(1.0, scorer.scoreParameter(result(ParameterCountFeature.NAME, 0)).score());
         }
 
-        @Test
-        @DisplayName("max = 3 → score 10 (triádico — último ideal)")
-        void threeParams() {
-            FeatureScore fs = scorer.scoreParameter(result(ParameterCountFeature.NAME, 3));
-            assertEquals(10.0, fs.score());
+        @Test @DisplayName("params = 1 → score 0.80")
+        void params_1() {
+            assertEquals(esperado(1, 5), scorer.scoreParameter(result(ParameterCountFeature.NAME, 1)).score(), 0.001);
         }
 
-        @Test
-        @DisplayName("max = 4 → score < 10 (começa a penalizar)")
-        void fourParams() {
-            FeatureScore fs = scorer.scoreParameter(result(ParameterCountFeature.NAME, 4));
-            assertTrue(fs.score() < 10.0 && fs.score() > 0.0);
+        @Test @DisplayName("params = 3 → score 0.40")
+        void params_3() {
+            assertEquals(esperado(3, 5), scorer.scoreParameter(result(ParameterCountFeature.NAME, 3)).score(), 0.001);
         }
 
-        @Test
-        @DisplayName("max = 5 → score 2 (aceitável com ressalvas)")
-        void fiveParams() {
-            FeatureScore fs = scorer.scoreParameter(result(ParameterCountFeature.NAME, 5));
-            assertEquals(2.0, fs.score());
+        @Test @DisplayName("params = 5 → score 0.00")
+        void params_5() {
+            assertEquals(0.0, scorer.scoreParameter(result(ParameterCountFeature.NAME, 5)).score());
         }
 
-        @Test
-        @DisplayName("max > 5 → score próximo de 0 (problema de design)")
-        void sixParams() {
-            FeatureScore fs = scorer.scoreParameter(result(ParameterCountFeature.NAME, 6));
-            assertTrue(fs.score() < 2.0);
-        }
-
-        @Test
-        @DisplayName("max = 10 → score 0 (poliádico extremo)")
-        void tenParams() {
-            FeatureScore fs = scorer.scoreParameter(result(ParameterCountFeature.NAME, 10));
-            assertEquals(0.0, fs.score());
+        @Test @DisplayName("params = 7 → score 0.00 (max trava em 0)")
+        void params_7() {
+            assertEquals(0.0, scorer.scoreParameter(result(ParameterCountFeature.NAME, 7)).score());
         }
     }
 
     // =========================================================================
-    // Comprimento de Linha
+    // Comprimento de Linha  (limiar = 100)
     // =========================================================================
     @Nested
-    @DisplayName("LineLength — normalização")
+    @DisplayName("LineLength — score = max(0, 1 - avgLen / 100)")
     class LineLengthTests {
 
-        @Test
-        @DisplayName("mean = 50 → score 10 (bem abaixo do limite)")
-        void shortLines() {
-            FeatureScore fs = scorer.scoreLine(result(LineLengthFeature.NAME, 50));
-            assertEquals(10.0, fs.score());
+        @Test @DisplayName("mean = 0   → score 1.00")
+        void line_0() {
+            assertEquals(1.0, scorer.scoreLine(result(LineLengthFeature.NAME, 0)).score());
         }
 
-        @Test
-        @DisplayName("mean = 80 → score 10 (exatamente no limite excelente)")
-        void atExcellentLimit() {
-            FeatureScore fs = scorer.scoreLine(result(LineLengthFeature.NAME, 80));
-            assertEquals(10.0, fs.score());
+        @Test @DisplayName("mean = 50  → score 0.50")
+        void line_50() {
+            assertEquals(esperado(50, 100), scorer.scoreLine(result(LineLengthFeature.NAME, 50)).score(), 0.001);
         }
 
-        @Test
-        @DisplayName("mean = 100 → score 5 (limite aceitável)")
-        void atAcceptableLimit() {
-            FeatureScore fs = scorer.scoreLine(result(LineLengthFeature.NAME, 100));
-            assertEquals(5.0, fs.score());
+        @Test @DisplayName("mean = 80  → score 0.20")
+        void line_80() {
+            assertEquals(esperado(80, 100), scorer.scoreLine(result(LineLengthFeature.NAME, 80)).score(), 0.001);
         }
 
-        @Test
-        @DisplayName("mean = 90 → score entre 5 e 10 (zona aceitável)")
-        void inAcceptableRange() {
-            FeatureScore fs = scorer.scoreLine(result(LineLengthFeature.NAME, 90));
-            assertTrue(fs.score() > 5.0 && fs.score() < 10.0);
+        @Test @DisplayName("mean = 100 → score 0.00")
+        void line_100() {
+            assertEquals(0.0, scorer.scoreLine(result(LineLengthFeature.NAME, 100)).score());
         }
 
-        @Test
-        @DisplayName("mean = 150 → score 0 (penalização máxima)")
-        void veryLongLines() {
-            FeatureScore fs = scorer.scoreLine(result(LineLengthFeature.NAME, 150));
-            assertEquals(0.0, fs.score());
+        @Test @DisplayName("mean = 150 → score 0.00 (max trava em 0)")
+        void line_150() {
+            assertEquals(0.0, scorer.scoreLine(result(LineLengthFeature.NAME, 150)).score());
         }
     }
 
     // =========================================================================
-    // Integração — nota final ponderada
+    // Integração — nota final
     // =========================================================================
     @Nested
-    @DisplayName("Integração — nota final")
+    @DisplayName("Integração — nota final ponderada")
     class IntegrationTests {
 
-        @Test
-        @DisplayName("código ideal em todas as features → nota 10")
+        @Test @DisplayName("todos os scores = 1.0 → nota final = 10.0")
         void perfectCode() {
-            Map<String, FeatureResult> results = Map.of(
-                    CognitiveComplexityFeature.NAME, result(CognitiveComplexityFeature.NAME, 2),
-                    NestingDepthFeature.NAME,        result(NestingDepthFeature.NAME,        1),
+            var results = Map.of(
+                    CognitiveComplexityFeature.NAME, result(CognitiveComplexityFeature.NAME, 0),
+                    NestingDepthFeature.NAME,        result(NestingDepthFeature.NAME,        0),
                     IdentifierLengthFeature.NAME,    result(IdentifierLengthFeature.NAME,    10),
-                    ParameterCountFeature.NAME,      result(ParameterCountFeature.NAME,      1),
-                    LineLengthFeature.NAME,          result(LineLengthFeature.NAME,          60)
+                    ParameterCountFeature.NAME,      result(ParameterCountFeature.NAME,      0),
+                    LineLengthFeature.NAME,          result(LineLengthFeature.NAME,           0)
             );
-            ScoreResult sr = scorer.score(results);
+            var sr = scorer.score(results);
             assertEquals(10.0, sr.finalScore());
             assertEquals("EXCELENTE", sr.classification());
         }
 
-        @Test
-        @DisplayName("código péssimo em todas as features → nota próxima de 0")
+        @Test @DisplayName("todos os scores = 0.0 → nota final = 0.0")
         void terribleCode() {
-            Map<String, FeatureResult> results = Map.of(
+            var results = Map.of(
                     CognitiveComplexityFeature.NAME, result(CognitiveComplexityFeature.NAME, 30),
-                    NestingDepthFeature.NAME,        result(NestingDepthFeature.NAME,        8),
-                    IdentifierLengthFeature.NAME,    result(IdentifierLengthFeature.NAME,    2),
+                    NestingDepthFeature.NAME,        result(NestingDepthFeature.NAME,        10),
+                    IdentifierLengthFeature.NAME,    result(IdentifierLengthFeature.NAME,    1),
                     ParameterCountFeature.NAME,      result(ParameterCountFeature.NAME,      10),
                     LineLengthFeature.NAME,          result(LineLengthFeature.NAME,          200)
             );
-            ScoreResult sr = scorer.score(results);
+            var sr = scorer.score(results);
             assertEquals(0.0, sr.finalScore());
             assertEquals("NECESSITA REFATORAÇÃO", sr.classification());
         }
 
-        @Test
-        @DisplayName("nota final sempre está no intervalo [0, 10]")
-        void scoreAlwaysInRange() {
-            Map<String, FeatureResult> results = Map.of(
-                    CognitiveComplexityFeature.NAME, result(CognitiveComplexityFeature.NAME, 100),
-                    NestingDepthFeature.NAME,        result(NestingDepthFeature.NAME,        100),
-                    IdentifierLengthFeature.NAME,    result(IdentifierLengthFeature.NAME,    100),
-                    ParameterCountFeature.NAME,      result(ParameterCountFeature.NAME,      100),
-                    LineLengthFeature.NAME,          result(LineLengthFeature.NAME,          1000)
+        @Test @DisplayName("nota final sempre está em [0, 10]")
+        void alwaysInRange() {
+            var results = Map.of(
+                    CognitiveComplexityFeature.NAME, result(CognitiveComplexityFeature.NAME, 999),
+                    NestingDepthFeature.NAME,        result(NestingDepthFeature.NAME,        999),
+                    IdentifierLengthFeature.NAME,    result(IdentifierLengthFeature.NAME,    999),
+                    ParameterCountFeature.NAME,      result(ParameterCountFeature.NAME,      999),
+                    LineLengthFeature.NAME,          result(LineLengthFeature.NAME,          999)
             );
-            ScoreResult sr = scorer.score(results);
+            var sr = scorer.score(results);
             assertTrue(sr.finalScore() >= 0.0 && sr.finalScore() <= 10.0);
         }
 
-        @Test
-        @DisplayName("ScoreResult contém exatamente 5 FeatureScores")
-        void detailsHaveFiveEntries() {
-            Map<String, FeatureResult> results = Map.of(
+        @Test @DisplayName("ScoreResult tem exatamente 5 FeatureScores")
+        void fiveDetails() {
+            var results = Map.of(
                     CognitiveComplexityFeature.NAME, result(CognitiveComplexityFeature.NAME, 5),
                     NestingDepthFeature.NAME,        result(NestingDepthFeature.NAME,        2),
                     IdentifierLengthFeature.NAME,    result(IdentifierLengthFeature.NAME,    12),
                     ParameterCountFeature.NAME,      result(ParameterCountFeature.NAME,      2),
-                    LineLengthFeature.NAME,          result(LineLengthFeature.NAME,          75)
+                    LineLengthFeature.NAME,          result(LineLengthFeature.NAME,          70)
             );
-            ScoreResult sr = scorer.score(results);
-            assertEquals(5, sr.details().size());
+            assertEquals(5, scorer.score(results).details().size());
         }
 
-        @Test
-        @DisplayName("Classificação ACEITÁVEL para nota entre 4 e 6")
-        void classificationAcceptable() {
-            // CogC moderado + nesting ok + resto ideal → nota na faixa aceitável
-            Map<String, FeatureResult> results = Map.of(
-                    CognitiveComplexityFeature.NAME, result(CognitiveComplexityFeature.NAME, 14),
-                    NestingDepthFeature.NAME,        result(NestingDepthFeature.NAME,        4),
+        @Test @DisplayName("nota calculada manualmente bate com a fórmula")
+        void manualVerification() {
+            // CogC=0 → 1.0, Nesting=0 → 1.0, Id=10 → 1.0, Params=0 → 1.0, Line=50 → 0.5
+            // nota = (0.30*1 + 0.25*1 + 0.20*1 + 0.15*1 + 0.10*0.5) * 10
+            //      = (0.30 + 0.25 + 0.20 + 0.15 + 0.05) * 10 = 0.95 * 10 = 9.5
+            var results = Map.of(
+                    CognitiveComplexityFeature.NAME, result(CognitiveComplexityFeature.NAME, 0),
+                    NestingDepthFeature.NAME,        result(NestingDepthFeature.NAME,        0),
                     IdentifierLengthFeature.NAME,    result(IdentifierLengthFeature.NAME,    10),
-                    ParameterCountFeature.NAME,      result(ParameterCountFeature.NAME,      3),
-                    LineLengthFeature.NAME,          result(LineLengthFeature.NAME,          80)
+                    ParameterCountFeature.NAME,      result(ParameterCountFeature.NAME,      0),
+                    LineLengthFeature.NAME,          result(LineLengthFeature.NAME,          50)
             );
-            ScoreResult sr = scorer.score(results);
-            assertTrue(sr.finalScore() >= 4.0 && sr.finalScore() < 8.0,
-                    "Esperava nota entre 4 e 8, mas foi: " + sr.finalScore());
+            assertEquals(9.5, scorer.score(results).finalScore(), 0.01);
         }
     }
 
     // =========================================================================
-    // Helpers matemáticos internos
+    // Helpers internos
     // =========================================================================
     @Nested
-    @DisplayName("Helpers matemáticos")
-    class MathHelperTests {
+    @DisplayName("Helpers internos")
+    class HelperTests {
 
-        @Test
-        @DisplayName("clamp abaixo do min → retorna min")
-        void clampBelowMin() {
-            assertEquals(0.0, Scorer.clamp(-5, 0, 10));
+        @Test @DisplayName("decrescente(0, 15) = 1.0")
+        void decrescenteZero() {
+            assertEquals(1.0, Scorer.decrescente(0, 15));
         }
 
-        @Test
-        @DisplayName("clamp acima do max → retorna max")
-        void clampAboveMax() {
+        @Test @DisplayName("decrescente(15, 15) = 0.0")
+        void decrescenteNoLimiar() {
+            assertEquals(0.0, Scorer.decrescente(15, 15));
+        }
+
+        @Test @DisplayName("decrescente(20, 15) = 0.0 (não fica negativo)")
+        void decrescenteAcimaLimiar() {
+            assertEquals(0.0, Scorer.decrescente(20, 15));
+        }
+
+        @Test @DisplayName("scoreZonaIdeal dentro do ideal → 1.0")
+        void zonaIdealDentro() {
+            assertEquals(1.0, Scorer.scoreZonaIdeal(10, 4, 8, 15, 25));
+        }
+
+        @Test @DisplayName("scoreZonaIdeal abaixo do zero → 0.0")
+        void zonaIdealAbaixo() {
+            assertEquals(0.0, Scorer.scoreZonaIdeal(2, 4, 8, 15, 25));
+        }
+
+        @Test @DisplayName("scoreZonaIdeal acima do zero → 0.0")
+        void zonaIdealAcima() {
+            assertEquals(0.0, Scorer.scoreZonaIdeal(30, 4, 8, 15, 25));
+        }
+
+        @Test @DisplayName("clamp abaixo do min → retorna min")
+        void clampAbaixo() {
+            assertEquals(0.0, Scorer.clamp(-1, 0, 10));
+        }
+
+        @Test @DisplayName("clamp acima do max → retorna max")
+        void clampAcima() {
             assertEquals(10.0, Scorer.clamp(15, 0, 10));
         }
-
-        @Test
-        @DisplayName("linearDescending no ponto inicial → retorna scoreHi")
-        void linearDescStart() {
-            assertEquals(10.0, Scorer.linearDescending(5, 5, 10, 10.0, 0.0));
-        }
-
-        @Test
-        @DisplayName("linearDescending no ponto final → retorna scoreLo")
-        void linearDescEnd() {
-            assertEquals(0.0, Scorer.linearDescending(10, 5, 10, 10.0, 0.0));
-        }
-
-        @Test
-        @DisplayName("linearAscending no ponto médio → retorna valor médio")
-        void linearAscMid() {
-            double result = Scorer.linearAscending(5, 0, 10, 0.0, 10.0);
-            assertEquals(5.0, result, 0.001);
-        }
-    }
-
-    // =========================================================================
-    // Utilitário
-    // =========================================================================
-
-    /** Cria um FeatureResult simples (max == mean == value). */
-    private static FeatureResult result(String name, double value) {
-        return FeatureResult.single(name, value);
     }
 }
