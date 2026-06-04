@@ -1,14 +1,11 @@
-package br.ufpe.cin.metric.extractor;
+package br.ufpe.cin.metric.extractor.features;
+
+import br.ufpe.cin.metric.extractor.Feature;
+import br.ufpe.cin.metric.model.FeatureResult;
+import br.ufpe.cin.metric.model.SourceFile;
 
 import java.util.List;
 
-/**
- * Feature 2: Comprimento Médio de Linha.
- *
- * <p>Média de caracteres por linha não-vazia do arquivo, sobre o texto-fonte original.
- * É uma feature por-arquivo, então {@code max == mean}. Limiares (ver roteiro):
- * ≤ 80 excelente | 81-100 aceitável | &gt; 100 penalização progressiva.
- */
 public class LineLengthFeature implements Feature {
 
     public static final String NAME = "lineLength";

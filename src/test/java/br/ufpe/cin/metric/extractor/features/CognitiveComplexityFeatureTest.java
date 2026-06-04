@@ -1,4 +1,7 @@
-package br.ufpe.cin.metric.extractor;
+package br.ufpe.cin.metric.extractor.features;
+
+import br.ufpe.cin.metric.model.FeatureResult;
+import br.ufpe.cin.metric.model.SourceFile;
 
 import br.ufpe.cin.metric.parser.JavaFileLoader;
 import org.junit.jupiter.api.Test;
@@ -15,8 +18,6 @@ class CognitiveComplexityFeatureTest {
 
     @Test
     void exemploCanonicoSumOfPrimes() {
-        // Exemplo do white paper de Campbell: CogC = 7
-        // for(+1) > for(+2) > if(+3) + continue rotulado(+1)
         SourceFile file = SourceFile.of("P.java",
                 "class P { int sumOfPrimes(int max) {"
                         + " int total = 0;"
@@ -44,7 +45,6 @@ class CognitiveComplexityFeatureTest {
 
     @Test
     void cadeiaElseIf() {
-        // if(+1) + else if(+1) + else(+1) = 3
         SourceFile file = SourceFile.of("E.java",
                 "class E { void f(int x) { if (x > 0) {} else if (x < 0) {} else {} } }");
 
@@ -53,7 +53,6 @@ class CognitiveComplexityFeatureTest {
 
     @Test
     void sequenciasDeOperadoresLogicos() {
-        // if(+1) + (a && b && c || d): && em sequência (+1) e alternância p/ || (+1) = 3
         SourceFile file = SourceFile.of("L.java",
                 "class L { void f(boolean a, boolean b, boolean c, boolean d) {"
                         + " if (a && b && c || d) {} } }");
@@ -71,8 +70,6 @@ class CognitiveComplexityFeatureTest {
 
     @Test
     void avaliaAmostraReal() throws Exception {
-        // pior método: checkLowStock = for(1) + if aninhado(2) + && (1) = 4
-        // soma dos 10 métodos = 13 → mean 1.3
         URL sample = getClass().getResource("/samples/InventoryManager.java");
         assertNotNull(sample, "amostra InventoryManager.java não encontrada no classpath");
         SourceFile file = JavaFileLoader.loadSource(new File(sample.toURI()).getPath());

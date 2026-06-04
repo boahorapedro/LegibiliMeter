@@ -1,4 +1,7 @@
-package br.ufpe.cin.metric.extractor;
+package br.ufpe.cin.metric.extractor.features;
+
+import br.ufpe.cin.metric.model.FeatureResult;
+import br.ufpe.cin.metric.model.SourceFile;
 
 import org.junit.jupiter.api.Test;
 
@@ -10,8 +13,6 @@ class LineLengthFeatureTest {
 
     @Test
     void mediaIgnoraLinhasEmBranco() {
-        // linhas não-vazias de 4 e 6 chars → média 5; max == mean (feature por-arquivo)
-        // ast irrelevante para esta feature; só o texto importa
         SourceFile file = new SourceFile("T.java", "aaaa\n\n   \nbbbbbb\n", null);
 
         FeatureResult result = feature.extract(file);
@@ -23,7 +24,6 @@ class LineLengthFeatureTest {
 
     @Test
     void fonteSemLinhasNaoVaziasRetornaZero() {
-        // ast irrelevante para esta feature; só o texto importa
         FeatureResult result = feature.extract(new SourceFile("V.java", "\n   \n\n", null));
 
         assertEquals(0, result.mean());

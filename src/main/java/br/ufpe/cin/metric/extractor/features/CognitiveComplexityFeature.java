@@ -1,4 +1,6 @@
-package br.ufpe.cin.metric.extractor;
+package br.ufpe.cin.metric.extractor.features;
+
+import br.ufpe.cin.metric.extractor.MethodLevelFeature;
 
 import com.github.javaparser.ast.Node;
 import com.github.javaparser.ast.body.MethodDeclaration;
@@ -17,23 +19,7 @@ import com.github.javaparser.ast.stmt.Statement;
 import com.github.javaparser.ast.stmt.SwitchStmt;
 import com.github.javaparser.ast.stmt.WhileStmt;
 
-import java.util.List;
-
-/**
- * Feature 5: Complexidade Cognitiva (Campbell, 2018).
- *
- * <p>Para cada método, pontua o esforço de leitura do fluxo de controle: +1 por
- * estrutura ({@code if}, {@code for}, {@code while}, {@code do}, {@code switch},
- * {@code catch}, ternário), mais uma penalidade igual ao nível de aninhamento atual.
- * {@code else}/{@code else if} somam +1 sem penalidade de aninhamento; sequências de
- * operadores lógicos ({@code &&}/{@code ||}) somam +1 por sequência; {@code break}/
- * {@code continue} rotulados somam +1. Lambdas aprofundam o aninhamento sem somar base.
- *
- * <p>Fora de escopo nesta versão: bônus para lambdas simples e +1 por recursão
- * (exige resolução de nomes). Agrega o arquivo por pior método ({@code max}) e média.
- * Limiares (ver roteiro): 0-5 excelente | 6-10 boa | 11-15 aceitável | ≥ 25 crítica.
- */
-public class CognitiveComplexityFeature implements Feature {
+public class CognitiveComplexityFeature extends MethodLevelFeature {
 
     public static final String NAME = "cognitiveComplexity";
 
@@ -43,22 +29,8 @@ public class CognitiveComplexityFeature implements Feature {
     }
 
     @Override
-    public FeatureResult extract(SourceFile file) {
-        List<MethodDeclaration> methods = file.ast().findAll(MethodDeclaration.class);
-        if (methods.isEmpty()) {
-            return new FeatureResult(NAME, 0, 0);
-        }
-
-        int max = 0;
-        long sum = 0;
-        for (MethodDeclaration method : methods) {
-            int complexity = complexityOf(method);
-            max = Math.max(max, complexity);
-            sum += complexity;
-        }
-
-        double mean = (double) sum / methods.size();
-        return new FeatureResult(NAME, max, mean);
+    protected int measure(MethodDeclaration method) {
+        return complexityOf(method);
     }
 
     private int complexityOf(MethodDeclaration method) {

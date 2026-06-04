@@ -1,4 +1,7 @@
-package br.ufpe.cin.metric.extractor;
+package br.ufpe.cin.metric.extractor.features;
+
+import br.ufpe.cin.metric.model.FeatureResult;
+import br.ufpe.cin.metric.model.SourceFile;
 
 import br.ufpe.cin.metric.parser.JavaFileLoader;
 import org.junit.jupiter.api.Test;
@@ -16,7 +19,6 @@ class IdentifierLengthFeatureTest {
 
     @Test
     void mediaSobreNomesDeclarados() {
-        // declarados: Abc(3), run(3), p(1), xy(2), value(5) → soma 14 / 5 = 2.8
         SourceFile file = SourceFile.of("Abc.java",
                 "class Abc { int xy; void run(int p) { int value = 1; } }");
 
@@ -35,7 +37,6 @@ class IdentifierLengthFeatureTest {
 
         FeatureResult result = feature.extract(file);
 
-        // amostra usa nomes curtos/crípticos (q, ms, pr, idx...); média baixa esperada
         assertTrue(result.mean() > 0 && result.mean() < 8,
                 "esperava média de identificadores curta, foi " + result.mean());
     }

@@ -1,6 +1,6 @@
 package br.ufpe.cin.metric.parser;
 
-import br.ufpe.cin.metric.extractor.SourceFile;
+import br.ufpe.cin.metric.model.SourceFile;
 import com.github.javaparser.StaticJavaParser;
 import com.github.javaparser.ast.CompilationUnit;
 
