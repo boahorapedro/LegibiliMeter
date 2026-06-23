@@ -1,0 +1,41 @@
+page_id,title,description,questions,has_code
+S01,Snippet 01/40,Soma todos os números positivos de um array usando for-loop.,S01_opiniao | S01_comentario,1
+S02,Snippet 02/40,Soma todos os números positivos de um array usando um loop tradicional.,S02_opiniao | S02_comentario,1
+S03,Snippet 03/40,Calcula a média de valores de receita mensal em dólares.,S03_opiniao | S03_comentario,1
+S04,Snippet 04/40,Calcula a média de valores usando funções matemáticas e operações aritméticas.,S04_opiniao | S04_comentario,1
+S05,Snippet 05/40,"Classifica usuários baseado em idade, presença de ticket, status VIP e bloqueio, usando múltiplas condições.",S05_opiniao | S05_comentario,1
+S06,Snippet 06/40,Classifica usuários com a mesma lógica usando guard clauses e retorno rápido.,S06_opiniao | S06_comentario,1
+S07,Snippet 07/40,Conta quantas palavras de um array possuem mais de 7 caracteres.,S07_opiniao | S07_comentario,1
+S08,Snippet 08/40,Conta quantas palavras de um array possuem mais de 7 caracteres.,S08_opiniao | S08_comentario,1
+S09,Snippet 09/40,Formata um valor em centavos para uma string de moeda com dois dígitos decimais.,S09_opiniao | S09_comentario,1
+S10,Snippet 10/40,Formata um valor em centavos para uma string de moeda com dois dígitos decimais.,S10_opiniao | S10_comentario,1
+S11,Snippet 11/40,Constrói uma string repetindo o caractere 'a' um número especificado de vezes.,S11_opiniao | S11_comentario,1
+S12,Snippet 12/40,Realiza operações bit-a-bit complexas e conversões entre inteiros e suas representações hexadecimal e octal.,S12_opiniao | S12_comentario,1
+S13,Snippet 13/40,Calcula a área multiplicando largura por altura.,S13_opiniao | S13_comentario,1
+S14,Snippet 14/40,"Realiza cálculos complexos com múltiplos operadores aritméticos, lógicos e bit-a-bit.",S14_opiniao | S14_comentario,1
+S15,Snippet 15/40,Conta quantos números pares estão presentes em um array.,S15_opiniao | S15_comentario,1
+S16,Snippet 16/40,"Processa arrays calculando sua soma, contando palavras longas e retornando um status formatado.",S16_opiniao | S16_comentario,1
+S17,Snippet 17/40,"Normaliza valores entre 0 e 100, calcula média e retorna o score normalizado de dois valores.",S17_opiniao | S17_comentario,1
+S18,Snippet 18/40,Normaliza valores manualmente e calcula a média de dois scores.,S18_opiniao | S18_comentario,1
+S19,Snippet 19/40,Adiciona 10% de imposto a um preço e verifica o resultado com teste unitário.,S19_opiniao | S19_comentario,1
+S20,Snippet 20/40,Adiciona 10% de imposto a um preço e executa múltiplos testes de validação.,S20_opiniao | S20_comentario,1
+S21,Snippet 21/40,Calcula o total de uma fatura subtraindo desconto de um subtotal.,S21_opiniao | S21_comentario,1
+S22,Snippet 22/40,Calcula o total de uma fatura usando parâmetros com nomes abreviados.,S22_opiniao | S22_comentario,1
+S23,Snippet 23/40,"Valida se uma senha é forte verificando comprimento mínimo, letra maiúscula e dígito.",S23_opiniao | S23_comentario,1
+S24,Snippet 24/40,Valida se uma senha é forte verificando múltiplos critérios em uma única expressão.,S24_opiniao | S24_comentario,1
+S25,Snippet 25/40,Retorna o próximo número após incrementar um valor em uma unidade.,S25_opiniao | S25_comentario,1
+S26,Snippet 26/40,"Agrega valores aplicando operações de adição, multiplicação e limite máximo.",S26_opiniao | S26_comentario,1
+S27,Snippet 27/40,Calcula soma mais multiplicação respeitando precedência de operadores.,S27_opiniao | S27_comentario,1
+S28,Snippet 28/40,"Realiza cálculos complexos envolvendo adição, subtração, divisão, operadores bit-a-bit e módulo.",S28_opiniao | S28_comentario,1
+S29,Snippet 29/40,"Encontra o índice da primeira fatura com dias em atraso, ou retorna -1 se nenhuma estiver atrasada.",S29_opiniao | S29_comentario,1
+S30,Snippet 30/40,Soma todos os valores positivos de um array.,S30_opiniao | S30_comentario,1
+S31,Snippet 31/40,Processa e formata strings combinando múltiplas fontes de entrada com transformações de caso.,S31_opiniao | S31_comentario,1
+S32,Snippet 32/40,Calcula um valor começando com um número e aplicando sequência de transformações aritméticas.,S32_opiniao | S32_comentario,1
+S33,Snippet 33/40,Processa dados de usuário armazenando em variáveis intermediárias e combinando informações.,S33_opiniao | S33_comentario,1
+S34,Snippet 34/40,"Retorna a soma de três números se todos forem positivos e menores que 100, caso contrário retorna 0.",S34_opiniao | S34_comentario,1
+S35,Snippet 35/40,Valida múltiplas condições booleanas com operadores lógicos dentro de loops condicionais.,S35_opiniao | S35_comentario,1
+S36,Snippet 36/40,"Processa um número aplicando transformações diferentes baseado em seu sinal (positivo, negativo ou zero).",S36_opiniao | S36_comentario,1
+S37,Snippet 37/40,"Realiza cálculos complexos com operações aritméticas, bit-a-bit e seleção condicional ternária.",S37_opiniao | S37_comentario,1
+S38,Snippet 38/40,"Categoriza valores em positivos, negativos e zero, e acumula resultados com operações matemáticas.",S38_opiniao | S38_comentario,1
+S39,Snippet 39/40,Calcula um número aplicando sequência de transformações aritméticas em passos separados.,S39_opiniao | S39_comentario,1
+S40,Snippet 40/40,Processa parâmetros aplicando operações de adição e multiplicação.,S40_opiniao | S40_comentario,1

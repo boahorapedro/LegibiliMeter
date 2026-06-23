@@ -1,0 +1,6 @@
+file,finalScore,classification,feature,label,rawValue,score,weightPercent
+S01-snippet-01-40.java,7.74,BOA LEGIBILIDADE,cognitiveComplexity,Complexidade Cognitiva,3.00,0.80,30
+S01-snippet-01-40.java,7.74,BOA LEGIBILIDADE,nestingDepth,Profundidade de Aninhamento,2.00,0.67,20
+S01-snippet-01-40.java,7.74,BOA LEGIBILIDADE,identifierLength,Comprimento de Identificadores,7.20,0.80,20
+S01-snippet-01-40.java,7.74,BOA LEGIBILIDADE,parameterCount,Número de Parâmetros,1.00,0.80,15
+S01-snippet-01-40.java,7.74,BOA LEGIBILIDADE,lineLength,Comprimento de Linha,20.27,0.80,15
