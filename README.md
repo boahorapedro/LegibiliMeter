@@ -95,7 +95,6 @@ Saída no terminal:
 ============================================================
 ```
 
-> Os pesos refletem a calibração Nível A (ver `eval/DECISOES-CALIBRACAO.md`).
 
 ### Relatório de avaliação (scorer × nota da turma)
 
