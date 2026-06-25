@@ -93,7 +93,7 @@ class ScorerTest {
     // Profundidade de Aninhamento  (limiar = 5)
     // =========================================================================
     @Nested
-    @DisplayName("NestingDepth — score = max(0, 1 - depth / 5)")
+    @DisplayName("NestingDepth — score = max(0, 1 - depth / 6)  [limiar calibrado]")
     class NestingDepthTests {
 
         @Test @DisplayName("depth = 0 → score 1.00")
@@ -101,19 +101,24 @@ class ScorerTest {
             assertEquals(1.0, scorer.scoreNesting(result(NestingDepthFeature.NAME, 0)).score());
         }
 
-        @Test @DisplayName("depth = 1 → score 0.80")
+        @Test @DisplayName("depth = 1 → score 0.83")
         void depth_1() {
-            assertEquals(esperado(1, 5), scorer.scoreNesting(result(NestingDepthFeature.NAME, 1)).score(), 0.001);
+            assertEquals(esperado(1, 6), scorer.scoreNesting(result(NestingDepthFeature.NAME, 1)).score(), 0.01);
         }
 
-        @Test @DisplayName("depth = 3 → score 0.40")
+        @Test @DisplayName("depth = 3 → score 0.50")
         void depth_3() {
-            assertEquals(esperado(3, 5), scorer.scoreNesting(result(NestingDepthFeature.NAME, 3)).score(), 0.001);
+            assertEquals(esperado(3, 6), scorer.scoreNesting(result(NestingDepthFeature.NAME, 3)).score(), 0.001);
         }
 
-        @Test @DisplayName("depth = 5 → score 0.00")
+        @Test @DisplayName("depth = 5 → score 0.17")
         void depth_5() {
-            assertEquals(0.0, scorer.scoreNesting(result(NestingDepthFeature.NAME, 5)).score());
+            assertEquals(esperado(5, 6), scorer.scoreNesting(result(NestingDepthFeature.NAME, 5)).score(), 0.01);
+        }
+
+        @Test @DisplayName("depth = 6 → score 0.00")
+        void depth_6() {
+            assertEquals(0.0, scorer.scoreNesting(result(NestingDepthFeature.NAME, 6)).score());
         }
 
         @Test @DisplayName("depth = 8 → score 0.00 (max trava em 0)")
@@ -298,11 +303,11 @@ class ScorerTest {
             assertEquals(5, scorer.score(results).details().size());
         }
 
-        @Test @DisplayName("nota calculada manualmente bate com a fórmula")
+        @Test @DisplayName("nota calculada manualmente bate com a fórmula (pesos calibrados)")
         void manualVerification() {
             // CogC=0 → 1.0, Nesting=0 → 1.0, Id=10 → 1.0, Params=0 → 1.0, Line=50 → 0.5
-            // nota = (0.30*1 + 0.25*1 + 0.20*1 + 0.15*1 + 0.10*0.5) * 10
-            //      = (0.30 + 0.25 + 0.20 + 0.15 + 0.05) * 10 = 0.95 * 10 = 9.5
+            // nota = (0.30*1 + 0.20*1 + 0.20*1 + 0.15*1 + 0.15*0.5) * 10
+            //      = (0.30 + 0.20 + 0.20 + 0.15 + 0.075) * 10 = 0.925 * 10 = 9.25
             var results = Map.of(
                     CognitiveComplexityFeature.NAME, result(CognitiveComplexityFeature.NAME, 0),
                     NestingDepthFeature.NAME,        result(NestingDepthFeature.NAME,        0),
@@ -310,7 +315,7 @@ class ScorerTest {
                     ParameterCountFeature.NAME,      result(ParameterCountFeature.NAME,      0),
                     LineLengthFeature.NAME,          result(LineLengthFeature.NAME,          50)
             );
-            assertEquals(9.5, scorer.score(results).finalScore(), 0.01);
+            assertEquals(9.25, scorer.score(results).finalScore(), 0.01);
         }
     }
 

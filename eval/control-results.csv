@@ -1,0 +1,7 @@
+sample,category,toolScore,threshold,pass
+AccessPolicy,ideal,8.32,7.0,true
+InvoiceTotals,ideal,8.98,7.0,true
+NumberSummer,ideal,8.04,7.0,true
+Calc,problematic,1.44,4.0,true
+P,problematic,1.50,4.0,true
+Q,problematic,2.83,4.0,true

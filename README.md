@@ -34,8 +34,8 @@ arquivo.java → Parser & Loader → Feature Extractor → Scorer → Reporter �
 | :--- | :--- | :---: |
 | **Parser & Loader** | Lê o arquivo e constrói a AST (JavaParser) | ✅ |
 | **Feature Extractor** | Percorre o código e coleta o valor bruto de cada feature | ✅ |
-| **Scorer** | Normaliza os valores e aplica a soma ponderada | ⬜ |
-| **Reporter** | Apresenta a nota com detalhamento (terminal + JSON/CSV) | ⬜ |
+| **Scorer** | Normaliza os valores e aplica a soma ponderada | ✅ |
+| **Reporter** | Apresenta a nota com detalhamento (terminal + JSON/CSV) | ✅ |
 
 ### Contrato da camada de extração
 
@@ -66,11 +66,48 @@ mvn test          # compila e roda a suíte de testes
 mvn -o test       # offline (após o primeiro build popular o cache)
 ```
 
-Uso atual da CLI (ainda lista métodos; o scorer está em desenvolvimento):
+Uso da CLI (pipeline completa: parser → extração → score → relatório):
 
 ```bash
-mvn -q compile exec:java -Dexec.mainClass=br.ufpe.cin.metric.Main \
-    -Dexec.args="caminho/para/Arquivo.java"
+# nota no terminal
+mvn -q compile exec:java -Dexec.args="caminho/para/Arquivo.java"
+
+# exportando também relatórios estruturados
+mvn -q compile exec:java \
+    -Dexec.args="caminho/para/Arquivo.java --json saida.json --csv saida.csv"
+```
+
+Saída no terminal:
+
+```
+============================================================
+  LegibiliMeter — InventoryManager.java
+============================================================
+  Nota final : 6.03 / 10   [BOA LEGIBILIDADE]
+------------------------------------------------------------
+  Feature                             Bruto    Score   Peso
+------------------------------------------------------------
+  Complexidade Cognitiva               4.00     0.73    30%
+  Profundidade de Aninhamento          2.00     0.67    20%
+  Comprimento de Identificadores       6.46     0.62    20%
+  Número de Parâmetros                 4.00     0.20    15%
+  Comprimento de Linha                35.60     0.64    15%
+============================================================
+```
+
+> Os pesos refletem a calibração Nível A (ver `eval/DECISOES-CALIBRACAO.md`).
+
+### Relatório de avaliação (scorer × nota da turma)
+
+Além do relatório por arquivo acima, o harness de avaliação compara a nota da
+ferramenta com a nota humana da turma e gera relatórios CSV + JSON
+automaticamente:
+
+```bash
+mvn -q compile exec:java \
+    -Dexec.mainClass=br.ufpe.cin.metric.eval.EvaluationRunner \
+    -Dexec.args="eval/snippets eval/class-scores.csv eval/final-results"
+# → escreve eval/final-results.csv e eval/final-results.json
 ```
 
 ## Estrutura do projeto
@@ -78,15 +115,19 @@ mvn -q compile exec:java -Dexec.mainClass=br.ufpe.cin.metric.Main \
 ```
 src/
 ├── main/java/br/ufpe/cin/metric/
-│   ├── Main.java                 # ponto de entrada (CLI)
+│   ├── Main.java                 # ponto de entrada (CLI) — orquestra a pipeline
+│   ├── model/                    # SourceFile, FeatureResult (valor bruto max/mean)
 │   ├── parser/JavaFileLoader     # Parser & Loader
-│   └── extractor/                # Feature Extractor
-│       ├── Feature               # contrato comum
-│       ├── FeatureResult         # valor bruto (max/mean)
-│       ├── SourceFile            # arquivo: texto + AST
-│       └── *Feature              # as 5 features
+│   ├── extractor/                # Feature Extractor
+│   │   ├── Feature               # contrato comum
+│   │   ├── MethodLevelFeature    # base das features por-método
+│   │   ├── FeatureExtractor      # roda as 5 features → mapa de resultados
+│   │   └── features/*Feature      # as 5 features
+│   ├── scorer/                   # Scorer, ScoreResult, FeatureScore
+│   └── reporter/Reporter         # saída terminal + JSON + CSV
 └── test/
     ├── java/.../extractor/       # testes unitários por feature
+    ├── java/.../scorer/          # testes do scorer
     └── resources/samples/        # amostras de código para os testes
 ```
 
@@ -94,6 +135,6 @@ src/
 
 - ✅ **Semana 1** — ambiente, build Maven, parser
 - ✅ **Semana 2** — as 5 features implementadas e testadas
-- ⬜ **Semana 3** — Scorer (normalização + soma ponderada)
-- ⬜ **Semana 4** — testes com casos reais e calibração dos limiares
-- ⬜ **Semana 5** — avaliação da ferramenta
+- ✅ **Semana 3** — Scorer (normalização + soma ponderada) + pipeline completa (extractor → scorer → reporter)
+- ✅ **Semana 4** — testes com casos reais e calibração dos limiares
+- ✅ **Semana 5** — avaliação da ferramenta

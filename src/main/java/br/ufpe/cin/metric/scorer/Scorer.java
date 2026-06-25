@@ -20,16 +20,16 @@ import java.util.Map;
  * Para IdentifierLength (tem zona ideal, não só "menor é melhor"),
  * usa penalização simétrica em torno do intervalo ideal.
  *
- * Pesos:
+ * Pesos (após calibração Nível A — ver eval/DECISOES-CALIBRACAO.md):
  *   Complexidade Cognitiva   → 30%
- *   Profundidade Aninhamento → 25%
+ *   Profundidade Aninhamento → 20%   (era 25%)
  *   Compr. Identificadores   → 20%
  *   Número de Parâmetros     → 15%
- *   Comprimento de Linha     → 10%
+ *   Comprimento de Linha     → 15%   (era 10%)
  *
- * Limiares (definidos na proposta do grupo):
+ * Limiares:
  *   CognitiveComplexity : limiar = 15
- *   NestingDepth        : limiar = 5
+ *   NestingDepth        : limiar = 6    (era 5)
  *   IdentifierLength    : ideal  = [8, 15]
  *   ParameterCount      : limiar = 5
  *   LineLength          : limiar = 100
@@ -38,18 +38,23 @@ public class Scorer {
 
     // -------------------------------------------------------------------------
     // Pesos (somam 1.0)
+    // Calibração Nível A: aninhamento penalizava forte demais frente ao
+    // julgamento humano (snippet S05); parte do peso migrou para comprimento
+    // de linha, melhor proxy para expressões densas/crípticas.
     // -------------------------------------------------------------------------
-    static final double WEIGHT_COGNITIVE  = 0.30;
-    static final double WEIGHT_NESTING    = 0.25;
-    static final double WEIGHT_IDENTIFIER = 0.20;
-    static final double WEIGHT_PARAMETER  = 0.15;
-    static final double WEIGHT_LINE       = 0.10;
+    public static final double WEIGHT_COGNITIVE  = 0.30;
+    public static final double WEIGHT_NESTING    = 0.20;
+    public static final double WEIGHT_IDENTIFIER = 0.20;
+    public static final double WEIGHT_PARAMETER  = 0.15;
+    public static final double WEIGHT_LINE       = 0.15;
 
     // -------------------------------------------------------------------------
     // Limiares (a partir desse valor o score chega a zero)
+    // Calibração Nível A: limiar de aninhamento 5 → 6 para suavizar a punição
+    // de código aninhado porém legível.
     // -------------------------------------------------------------------------
     static final double LIMIAR_COGNITIVE  = 15.0;
-    static final double LIMIAR_NESTING    = 5.0;
+    static final double LIMIAR_NESTING    = 6.0;
     static final double LIMIAR_PARAMETER  = 5.0;
     static final double LIMIAR_LINE       = 100.0;
 
