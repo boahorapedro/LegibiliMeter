@@ -131,13 +131,21 @@ public class Scorer {
     }
 
     /**
-     * score = max(0, 1 - params / 5)
-     * Usa o max entre os métodos do arquivo (pior caso).
+     * Calcula o score baseado no número de parâmetros usando uma lógica em degrau:
+     * ≤ 3 parâmetros → 1.0 (Ideal)
+     * 4 a 5 parâmetros → 0.5 (Aceitável)
+     * > 5 parâmetros → 0.0 (Problema de Design)
+     * Uses o max entre os métodos do arquivo (pior caso).
      */
     FeatureScore scoreParameter(FeatureResult r) {
         if (r == null) return new FeatureScore(ParameterCountFeature.NAME, 0, 1.0);
-        double raw   = r.max();
-        double score = decrescente(raw, LIMIAR_PARAMETER);
+        double raw = r.max();
+        double score;
+
+        if (raw <= LIMIAR_PARAMETER - 2) score = 1.0;
+        else if (raw <= LIMIAR_PARAMETER) score = 0.5; // Ou outro valor de penalidade moderada
+        else score = 0.0;
+
         return new FeatureScore(ParameterCountFeature.NAME, raw, round2(score));
     }
 

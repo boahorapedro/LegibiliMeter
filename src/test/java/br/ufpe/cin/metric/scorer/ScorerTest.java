@@ -178,33 +178,38 @@ class ScorerTest {
     }
 
     // =========================================================================
-    // Número de Parâmetros  (limiar = 5)
+    // Número de Parâmetros (Lógica em Degrau)
     // =========================================================================
     @Nested
-    @DisplayName("ParameterCount — score = max(0, 1 - params / 5)")
+    @DisplayName("ParameterCount — Score em degrau: <=3 -> 1.0 | 4-5 -> 0.5 | >5 -> 0.0")
     class ParameterCountTests {
 
-        @Test @DisplayName("params = 0 → score 1.00")
+        @Test @DisplayName("params = 0 → score 1.00 (Ideal)")
         void params_0() {
             assertEquals(1.0, scorer.scoreParameter(result(ParameterCountFeature.NAME, 0)).score());
         }
 
-        @Test @DisplayName("params = 1 → score 0.80")
+        @Test @DisplayName("params = 1 → score 1.00 (Ideal)")
         void params_1() {
-            assertEquals(esperado(1, 5), scorer.scoreParameter(result(ParameterCountFeature.NAME, 1)).score(), 0.001);
+            assertEquals(1.0, scorer.scoreParameter(result(ParameterCountFeature.NAME, 1)).score());
         }
 
-        @Test @DisplayName("params = 3 → score 0.40")
+        @Test @DisplayName("params = 3 → score 1.00 (Limite Ideal)")
         void params_3() {
-            assertEquals(esperado(3, 5), scorer.scoreParameter(result(ParameterCountFeature.NAME, 3)).score(), 0.001);
+            assertEquals(1.0, scorer.scoreParameter(result(ParameterCountFeature.NAME, 3)).score());
         }
 
-        @Test @DisplayName("params = 5 → score 0.00")
+        @Test @DisplayName("params = 4 → score 0.50 (Aceitável)")
+        void params_4() {
+            assertEquals(0.5, scorer.scoreParameter(result(ParameterCountFeature.NAME, 4)).score());
+        }
+
+        @Test @DisplayName("params = 5 → score 0.50 (Limite Aceitável)")
         void params_5() {
-            assertEquals(0.0, scorer.scoreParameter(result(ParameterCountFeature.NAME, 5)).score());
+            assertEquals(0.5, scorer.scoreParameter(result(ParameterCountFeature.NAME, 5)).score());
         }
 
-        @Test @DisplayName("params = 7 → score 0.00 (max trava em 0)")
+        @Test @DisplayName("params = 7 → score 0.00 (Problema de Design)")
         void params_7() {
             assertEquals(0.0, scorer.scoreParameter(result(ParameterCountFeature.NAME, 7)).score());
         }
